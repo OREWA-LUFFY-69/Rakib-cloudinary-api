@@ -20,26 +20,20 @@ app.get('/upload', async (req, res) => {
   if (!mediaUrl) return res.json({ error: 'Missing ?url=' });
 
   try {
-    // Check if the media is a video or image based on content type or file extension
-    const extension = mediaUrl.split('.').pop().toLowerCase();
-    const videoExtensions = ['mp4', 'avi', 'mov', 'webm', 'mkv'];  // Supported video extensions
-    const isVideo = videoExtensions.includes(extension);
+    // Determine if the media is a video or image
+    let resourceType = mediaUrl.endsWith('.mp4') ? 'video' : 'image';
+    console.log("Resource Type:", resourceType);  // Log the resource type for debugging
 
-    const resourceType = isVideo ? 'video' : 'image';
-
-    // Upload the media
     const uploadResponse = await cloudinary.uploader.upload(mediaUrl, {
-      resource_type: resourceType,
-      use_filename: true,
-      unique_filename: false,
+      resource_type: resourceType  // Explicitly specify 'video' for video files
     });
 
     res.json({
       status: '✅ Upload successful!',
-      secure_url: uploadResponse.secure_url // Send the secure_url for the uploaded file
+      secure_url: uploadResponse.secure_url  // Send the secure_url for the uploaded file
     });
   } catch (err) {
-    console.error(err);
+    console.error("Error uploading to Cloudinary:", err);  // Log the error for debugging
     res.json({
       status: '❌ Upload failed',
       error: err.message
